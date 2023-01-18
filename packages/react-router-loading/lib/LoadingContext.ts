@@ -1,4 +1,4 @@
-import { createContext } from 'react';
+import { createContext } from "react";
 
 // Interface
 
@@ -11,18 +11,18 @@ export interface LoadingContextActions {
 // Actions
 
 const LoadingContext = createContext<LoadingContextActions>({
-  start: () => { },
-  done: () => { },
-  restart: () => { }
+  start: () => {},
+  done: () => {},
+  restart: () => {},
 });
-LoadingContext.displayName = 'LoadingContext';
+LoadingContext.displayName = "LoadingContext";
 
 // Value
 
 const LoadingGetterContext = createContext<boolean>(false);
-LoadingGetterContext.displayName = 'LoadingGetterContext';
+LoadingGetterContext.displayName = "LoadingGetterContext";
 
-export {
-  LoadingContext,
-  LoadingGetterContext
-};
+const LoadingRouteContext = createContext<boolean>(false);
+LoadingRouteContext.displayName = "LoadingRouteContext";
+
+export { LoadingContext, LoadingGetterContext, LoadingRouteContext };

@@ -1,10 +1,28 @@
-
-import React, { useState, useContext, useEffect, useMemo, useRef, PropsWithChildren, FC } from 'react';
-import { useLocation, Location, useNavigationType, NavigationType } from 'react-router';
-import { LoadingContext, LoadingGetterContext } from './LoadingContext';
-import DefaultLoadingScreen from './_DefaultLoadingScreen';
-import { createRoutesFromChildren, isLoadable, isPathsDifferent, isPathsEqual, isSearchDifferent } from './utils';
-import { RouteWrapper } from './_RouteWrapper';
+import React, {
+  useState,
+  useContext,
+  useEffect,
+  useMemo,
+  useRef,
+  PropsWithChildren,
+  FC,
+} from "react";
+import {
+  useLocation,
+  Location,
+  useNavigationType,
+  NavigationType,
+} from "react-router";
+import { LoadingContext, LoadingGetterContext } from "./LoadingContext";
+import DefaultLoadingScreen from "./_DefaultLoadingScreen";
+import {
+  createRoutesFromChildren,
+  isLoadable,
+  isPathsDifferent,
+  isPathsEqual,
+  isSearchDifferent,
+} from "./utils";
+import { RouteWrapper } from "./_RouteWrapper";
 
 interface LoadingRoutesProps {
   loadingScreen?: React.ElementType;
@@ -16,14 +34,13 @@ interface LoadingRoutesState {
   navigationType: NavigationType;
 }
 
-const LOADING_PATHNAME = '__loading';
+const LOADING_PATHNAME = "__loading";
 
 const LoadingRoutes: FC<PropsWithChildren<LoadingRoutesProps>> = ({
   children,
   loadingScreen: LoadingScreen,
-  maxLoadingTime = 0
+  maxLoadingTime = 0,
 }) => {
-
   // 🪝 Hooks
   const location = useLocation();
   const navigationType = useNavigationType();
@@ -31,10 +48,7 @@ const LoadingRoutes: FC<PropsWithChildren<LoadingRoutesProps>> = ({
   const isCurrentlyLoading = useContext(LoadingGetterContext);
 
   // 🗄 State
-  const routes = useMemo(
-    () => createRoutesFromChildren(children),
-    [children]
-  );
+  const routes = useMemo(() => createRoutesFromChildren(children), [children]);
 
   const [current, setCurrent] = useState<LoadingRoutesState>(() => {
     const isFirstPageLoadable = isLoadable(location, routes);
@@ -46,7 +60,7 @@ const LoadingRoutes: FC<PropsWithChildren<LoadingRoutesProps>> = ({
 
     return {
       location: firstLocation,
-      navigationType: navigationType
+      navigationType: navigationType,
     };
   });
   const [next, setNext] = useState<LoadingRoutesState>(current);
@@ -62,20 +76,18 @@ const LoadingRoutes: FC<PropsWithChildren<LoadingRoutesProps>> = ({
 
       setNext({
         location: { ...location },
-        navigationType
+        navigationType,
       });
 
       if (!isPageLoadable) {
         loadingContext.done();
         setCurrent({
           location: { ...location },
-          navigationType
+          navigationType,
         });
       } else {
-        if (!isCurrentlyLoading)
-          loadingContext.start();
-        else
-          loadingContext.restart();
+        if (!isCurrentlyLoading) loadingContext.start();
+        else loadingContext.restart();
       }
     }
 
@@ -86,14 +98,17 @@ const LoadingRoutes: FC<PropsWithChildren<LoadingRoutesProps>> = ({
       if (isSearchDifferent(location, current.location))
         setCurrent({
           location: { ...location },
-          navigationType
+          navigationType,
         });
     }
   }, [location]);
 
   // when loading is done
   useEffect(() => {
-    if (!isCurrentlyLoading && isPathsDifferent(current.location, next.location))
+    if (
+      !isCurrentlyLoading &&
+      isPathsDifferent(current.location, next.location)
+    )
       setCurrent(next);
   }, [isCurrentlyLoading]);
 
@@ -115,33 +130,34 @@ const LoadingRoutes: FC<PropsWithChildren<LoadingRoutesProps>> = ({
 
   // memo current and next components
   return useMemo(
-    () => <>
-      {/* current */}
-      {
-        current.location.pathname !== LOADING_PATHNAME
-          ? <RouteWrapper
-            key={current.location.pathname}
+    () => (
+      <>
+        {/* current */}
+        {current.location.pathname !== LOADING_PATHNAME ? (
+          <RouteWrapper
+            // key={current.location.pathname}
             routes={routes}
             location={current.location}
             navigationType={current.navigationType}
           />
-          : LoadingScreen
-            ? <LoadingScreen />
-            : <DefaultLoadingScreen />
-      }
+        ) : LoadingScreen ? (
+          <LoadingScreen />
+        ) : (
+          <DefaultLoadingScreen />
+        )}
 
-      {/* hidden next */}
-      {
-        isPathsDifferent(current.location, next.location) &&
-        <RouteWrapper
-          key={next.location.pathname}
-          routes={routes}
-          location={next.location}
-          navigationType={next.navigationType}
-          hidden
-        />
-      }
-    </>,
+        {/* hidden next */}
+        {isPathsDifferent(current.location, next.location) && (
+          <RouteWrapper
+            key={next.location.pathname}
+            routes={routes}
+            location={next.location}
+            navigationType={next.navigationType}
+            hidden
+          />
+        )}
+      </>
+    ),
     [current, next]
   );
 };

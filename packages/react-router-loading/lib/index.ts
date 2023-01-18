@@ -1,9 +1,13 @@
-import { useContext } from 'react';
-import { default as _topbar } from 'topbar';
-import { LoadingContext, LoadingGetterContext } from './LoadingContext';
+import { useContext } from "react";
+import { default as _topbar } from "topbar";
+import {
+  LoadingContext,
+  LoadingGetterContext,
+  LoadingRouteContext,
+} from "./LoadingContext";
 
-export { default as Route } from './Route';
-export { default as Routes } from './Routes';
+export { default as Route } from "./Route";
+export { default as Routes } from "./Routes";
 
 export interface TopBarConfig {
   autoRun?: boolean;
@@ -23,10 +27,12 @@ export interface TopBar {
 const topbar: TopBar = _topbar;
 
 const useLoadingContext = () => useContext(LoadingContext);
+const useLoadingRouteContext = () => useContext(LoadingRouteContext);
 
 export {
   topbar,
   useLoadingContext,
+  useLoadingRouteContext,
   LoadingContext,
-  LoadingGetterContext
+  LoadingGetterContext,
 };
