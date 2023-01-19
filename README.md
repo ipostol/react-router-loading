@@ -7,13 +7,14 @@ Wrapper for `react-router` that allows you to load data before switching the scr
 <a href="https://codesandbox.io/s/react-router-loading-demo-sguvm" target="_blank">DEMO 0.x.x</a> (React Router 5)
 
 ## Requirements
+
 ### ‼️ Version `1.x.x` supports React Router 6 only, please use version `0.x.x` for React Router 5 ‼️
 
-|  |  |  |
-| ------------ | ------- | --- |
-| react        | >= 16.8 |     |
-| react-router | **^5.0.0** |  **Package version 0.x.x**  |
-| react-router | **^6.0.0** |  **Package version 1.x.x**  |
+|              |            |                           |
+| ------------ | ---------- | ------------------------- |
+| react        | >= 16.8    |                           |
+| react-router | **^5.0.0** | **Package version 0.x.x** |
+| react-router | **^6.0.0** | **Package version 1.x.x** |
 
 This package uses `react-router` (`react-router-dom` or `react-router-native`) as main router so you should implement it in your project first.
 
@@ -24,83 +25,91 @@ npm install react-router-loading
 ## or
 yarn add react-router-loading
 ```
+
 # Usage
+
 ## React Router 6 (package version 1.x.x)
 
 In your router section import `Routes` and `Route` from `react-router-loading` instead of `react-router-dom` or `react-router-native`
+
 ```js
 import { Routes, Route } from "react-router-loading";
 
 <Routes>
-    <Route path="/page1" element={<Page1 />} />
-    <Route path="/page2" element={<Page2 />} />
-    ...
-</Routes>
+  <Route path="/page1" element={<Page1 />} />
+  <Route path="/page2" element={<Page2 />} />
+  ...
+</Routes>;
 ```
 
 Add `loading` prop to every route that needs to be loaded before switching
+
 ```js
 <Routes>
-    // data will be loaded before switching
-    <Route path="/page1" element={<Page1 />} loading />
-
-    // instant switch as before
-    <Route path="/page2" element={<Page2 />} />
-    ...
+  // data will be loaded before switching
+  <Route path="/page1" element={<Page1 />} loading />
+  // instant switch as before
+  <Route path="/page2" element={<Page2 />} />
+  ...
 </Routes>
 ```
 
 Add `loadingContext.done()` at the end of your initial loading method in components that mentioned in routes with `loading` prop (in this case it's `Page1`)
+
 ```js
 import { useLoadingContext } from "react-router-loading";
 const loadingContext = useLoadingContext();
 
 const loading = async () => {
-    // loading some data
+  // loading some data
 
-    // call method to indicate that loading is done and we are ready to switch
-    loadingContext.done();
+  // call method to indicate that loading is done and we are ready to switch
+  loadingContext.done();
 };
 ```
 
 ## React Router 5 (package version 0.x.x)
 
 In your router section import `Switch` and `Route` from `react-router-loading` instead of `react-router-dom`
+
 ```js
 import { Switch, Route } from "react-router-loading";
 
 <Switch>
-    <Route path="/page1" component={Page1} />
-    <Route path="/page2" component={Page2} />
-    ...
-</Switch>
+  <Route path="/page1" component={Page1} />
+  <Route path="/page2" component={Page2} />
+  ...
+</Switch>;
 ```
 
 Add `loading` prop to every route that needs to be loaded before switching
+
 ```js
 <Switch>
-    // data will be loaded before switching
-    <Route path="/page1" component={Page1} loading />
-
-    // instant switch as before
-    <Route path="/page2" component={Page2} />
-    ...
+  // data will be loaded before switching
+  <Route path="/page1" component={Page1} loading />
+  // instant switch as before
+  <Route path="/page2" component={Page2} />
+  ...
 </Switch>
 ```
 
 Add `loadingContext.done()` at the end of your initial loading method in components that mentioned in routes with `loading` prop (in this case it's `Page1`)
+
 ```js
 import { LoadingContext } from "react-router-loading";
 const loadingContext = useContext(LoadingContext);
 
 const loading = async () => {
-    // loading some data
+  // loading some data
 
-    // call method to indicate that loading is done and we are ready to switch
-    loadingContext.done();
+  // call method to indicate that loading is done and we are ready to switch
+  loadingContext.done();
 };
 ```
+
 ## Class components
+
 ```js
 import { LoadingContext } from "react-router-loading";
 
@@ -126,6 +135,7 @@ const ClassComponentWrapper = (props) =>
 ## Config
 
 You can specify loading screen that will be shown at the first loading of your app
+
 ```js
 const MyLoadingScreen = () => <div>Loading...</div>
 
@@ -135,6 +145,7 @@ const MyLoadingScreen = () => <div>Loading...</div>
 ```
 
 Use `maxLoadingTime` property if you want to limit loading time. Pages will switch if loading takes more time than specified in this property (ms).
+
 ```js
 
 <Routes maxLoadingTime={500}> // or <Switch>
@@ -143,6 +154,7 @@ Use `maxLoadingTime` property if you want to limit loading time. Pages will swit
 ```
 
 If you want to change LoadingContext globally you can pass `isLoading` property to the `<Routes />` or `<Switch />`. This way you don't need to add extra `loadingContext.done();` in your page components after fetching is done.
+
 ```js
 import { useIsFetching } from 'react-query';
 const isFetching = useIsFetching();
@@ -153,25 +165,28 @@ const isFetching = useIsFetching();
 ```
 
 Call `topbar.config()` if you want to change topbar configuration. More info <a href="http://buunguyen.github.io/topbar/" target="_blank">here</a>.
+
 ```js
 import { topbar } from "react-router-loading";
 
 topbar.config({
-    autoRun: false,
-    barThickness: 5,
-    barColors: {
-        0: 'rgba(26,  188, 156, .7)',
-        .3: 'rgba(41,  128, 185, .7)',
-        1.0: 'rgba(231, 76,  60,  .7)'
-    },
-    shadowBlur: 5,
-    shadowColor: 'red',
-    className: 'topbar'
+  autoRun: false,
+  barThickness: 5,
+  barColors: {
+    0: "rgba(26,  188, 156, .7)",
+    0.3: "rgba(41,  128, 185, .7)",
+    1.0: "rgba(231, 76,  60,  .7)",
+  },
+  shadowBlur: 5,
+  shadowColor: "red",
+  className: "topbar",
 });
 ```
+
 # Development
 
 Clone repository and run
+
 ```sh
 # go to lib folder
 cd packages/react-router-loading
@@ -193,6 +208,10 @@ yarn dev
 ```
 
 run `yarn build` in lib folder each time you want to apply changes
+
+## External forks
+
+https://github.com/ipostol/react-router-loading
 
 ## License
 
