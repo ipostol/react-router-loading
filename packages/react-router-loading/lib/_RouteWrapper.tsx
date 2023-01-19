@@ -35,7 +35,7 @@ export const RouteWrapper: FC<RouteWrapperProps> = ({
               {element}
             </UNSAFE_LocationContext.Provider>
           ),
-          [location, hidden]
+          [location]
         )}
       </div>
     </LoadingRouteContext.Provider>

@@ -14,13 +14,10 @@ import {
   NavigationType,
 } from "react-router";
 import { LoadingContext, LoadingGetterContext } from "./LoadingContext";
-import DefaultLoadingScreen from "./_DefaultLoadingScreen";
 import {
   createRoutesFromChildren,
   isLoadable,
   isPathsDifferent,
-  isPathsEqual,
-  isSearchDifferent,
 } from "./utils";
 import { RouteWrapper } from "./_RouteWrapper";
 
@@ -29,17 +26,13 @@ interface LoadingRoutesProps {
   maxLoadingTime?: number;
 }
 
-interface LoadingRoutesState {
-  location: Location;
-  navigationType: NavigationType;
-}
-
-const LOADING_PATHNAME = "__loading";
+// eslint-disable-next-line @typescript-eslint/ban-ts-comment
+// @ts-ignore
+window.cachedRoutes = {};
 
 const LoadingRoutes: FC<PropsWithChildren<LoadingRoutesProps>> = ({
   children,
   loadingScreen: LoadingScreen,
-  maxLoadingTime = 0,
 }) => {
   // 🪝 Hooks
   const location = useLocation();
@@ -47,118 +40,107 @@ const LoadingRoutes: FC<PropsWithChildren<LoadingRoutesProps>> = ({
   const loadingContext = useContext(LoadingContext);
   const isCurrentlyLoading = useContext(LoadingGetterContext);
 
+  const prevLocation: any = useRef();
+  const prevNavigationType: any = useRef();
+  const mount: any = useRef(false);
+
   // 🗄 State
   const routes = useMemo(() => createRoutesFromChildren(children), [children]);
+  const [, forceUpdate] = useState({});
 
-  const [current, setCurrent] = useState<LoadingRoutesState>(() => {
-    const isFirstPageLoadable = isLoadable(location, routes);
-
-    // if first page loadable showing loading screen
-    const firstLocation = isFirstPageLoadable
-      ? { ...location, pathname: LOADING_PATHNAME }
-      : location;
-
-    return {
-      location: firstLocation,
-      navigationType: navigationType,
-    };
-  });
-  const [next, setNext] = useState<LoadingRoutesState>(current);
-
-  const timeout: React.MutableRefObject<NodeJS.Timeout | undefined> = useRef();
+  const isPageLoadable = isLoadable(location, routes);
+  // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+  // @ts-ignore
+  const isNormal = !isPageLoadable || window.cachedRoutes[location.pathname];
 
   // 🔄 Lifecycle
   // when location was changed
   useEffect(() => {
-    // if not the same route mount it to start loading
-    if (isPathsDifferent(location, next.location)) {
-      const isPageLoadable = isLoadable(location, routes);
-
-      setNext({
-        location: { ...location },
-        navigationType,
-      });
-
-      if (!isPageLoadable) {
+    if (isNormal) {
+      if (isCurrentlyLoading) {
         loadingContext.done();
-        setCurrent({
-          location: { ...location },
-          navigationType,
-        });
-      } else {
-        if (!isCurrentlyLoading) loadingContext.start();
-        else loadingContext.restart();
+      }
+      prevLocation.current = { ...location };
+      prevNavigationType.current = navigationType;
+    } else {
+      if (isPathsDifferent(location, prevLocation.current)) {
+        mount.current = false;
+        loadingContext.start();
       }
     }
+  }, [location, isNormal]);
 
-    // if same as the current location stop loading
-    if (isPathsEqual(location, current.location)) {
-      loadingContext.done();
-
-      if (isSearchDifferent(location, current.location))
-        setCurrent({
-          location: { ...location },
-          navigationType,
-        });
-    }
-  }, [location]);
-
-  // when loading is done
   useEffect(() => {
     if (
       !isCurrentlyLoading &&
-      isPathsDifferent(current.location, next.location)
-    )
-      setCurrent(next);
+      mount.current &&
+      isPathsDifferent(prevLocation.current, location) &&
+      !isNormal
+    ) {
+      prevLocation.current = { ...location };
+      prevNavigationType.current = navigationType;
+      forceUpdate({});
+    }
+
+    if (isCurrentlyLoading && !mount.current) {
+      mount.current = true;
+    }
   }, [isCurrentlyLoading]);
 
-  // setTimeout if maxLoadingTime is provided
-  useEffect(() => {
-    if (maxLoadingTime > 0) {
-      if (timeout.current) {
-        clearTimeout(timeout.current);
-        timeout.current = undefined;
-      }
+  if (isNormal) {
+    return (
+      <RouteWrapper
+        routes={routes}
+        location={location}
+        navigationType={navigationType}
+      />
+    );
+  }
 
-      if (isPathsDifferent(current.location, next.location)) {
-        timeout.current = setTimeout(() => {
-          loadingContext.done();
-        }, maxLoadingTime);
-      }
-    }
-  }, [current, next]);
-
-  // memo current and next components
-  return useMemo(
-    () => (
+  if (isPageLoadable && !prevLocation.current && LoadingScreen) {
+    return (
       <>
-        {/* current */}
-        {current.location.pathname !== LOADING_PATHNAME ? (
-          <RouteWrapper
-            // key={current.location.pathname}
-            routes={routes}
-            location={current.location}
-            navigationType={current.navigationType}
-          />
-        ) : LoadingScreen ? (
-          <LoadingScreen />
-        ) : (
-          <DefaultLoadingScreen />
-        )}
-
-        {/* hidden next */}
-        {isPathsDifferent(current.location, next.location) && (
-          <RouteWrapper
-            key={next.location.pathname}
-            routes={routes}
-            location={next.location}
-            navigationType={next.navigationType}
-            hidden
-          />
-        )}
+        <LoadingScreen />
+        <RouteWrapper
+          key={location.pathname}
+          routes={routes}
+          location={location}
+          navigationType={navigationType}
+          hidden
+        />
       </>
-    ),
-    [current, next]
+    );
+  }
+
+  const isDisplayPrev =
+    isCurrentlyLoading || isPathsDifferent(prevLocation.current, location);
+
+  return (
+    <>
+      {isDisplayPrev ? (
+        <RouteWrapper
+          routes={routes}
+          location={prevLocation.current}
+          navigationType={prevNavigationType.current}
+        />
+      ) : (
+        <RouteWrapper
+          routes={routes}
+          location={location}
+          navigationType={navigationType}
+        />
+      )}
+
+      {/* hidden next */}
+      {isCurrentlyLoading && (
+        <RouteWrapper
+          routes={routes}
+          location={location}
+          navigationType={navigationType}
+          hidden
+        />
+      )}
+    </>
   );
 };
 
