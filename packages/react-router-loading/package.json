@@ -1,6 +1,6 @@
 {
   "name": "@ipostol/react-router-loading",
-  "version": "1.0.52",
+  "version": "1.0.53",
   "description": "Wrapper for react-router that allows you to load data before switching the screen",
   "author": "Postol Ivan",
   "repository": {
