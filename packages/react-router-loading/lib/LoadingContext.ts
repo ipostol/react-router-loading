@@ -6,6 +6,7 @@ export interface LoadingContextActions {
   start: () => void;
   done: () => void;
   restart: () => void;
+  isFirstRenderRef: any;
 }
 
 // Actions
@@ -14,6 +15,7 @@ const LoadingContext = createContext<LoadingContextActions>({
   start: () => {},
   done: () => {},
   restart: () => {},
+  isFirstRenderRef: { current: true },
 });
 LoadingContext.displayName = "LoadingContext";
 

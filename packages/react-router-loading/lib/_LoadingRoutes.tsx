@@ -26,10 +26,6 @@ interface LoadingRoutesProps {
   maxLoadingTime?: number;
 }
 
-// eslint-disable-next-line @typescript-eslint/ban-ts-comment
-// @ts-ignore
-window.cachedRoutes = {};
-
 const LoadingRoutes: FC<PropsWithChildren<LoadingRoutesProps>> = ({
   children,
   loadingScreen: LoadingScreen,
@@ -42,16 +38,14 @@ const LoadingRoutes: FC<PropsWithChildren<LoadingRoutesProps>> = ({
 
   const prevLocation: any = useRef();
   const prevNavigationType: any = useRef();
-  const mount: any = useRef(false);
+  //   const mount: any = useRef(false);
 
   // 🗄 State
   const routes = useMemo(() => createRoutesFromChildren(children), [children]);
   const [, forceUpdate] = useState({});
 
   const isPageLoadable = isLoadable(location, routes);
-  // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-  // @ts-ignore
-  const isNormal = !isPageLoadable || window.cachedRoutes[location.pathname];
+  const isNormal = !isPageLoadable;
 
   // 🔄 Lifecycle
   // when location was changed
@@ -64,7 +58,6 @@ const LoadingRoutes: FC<PropsWithChildren<LoadingRoutesProps>> = ({
       prevNavigationType.current = navigationType;
     } else {
       if (isPathsDifferent(location, prevLocation.current)) {
-        mount.current = false;
         loadingContext.start();
       }
     }
@@ -73,17 +66,13 @@ const LoadingRoutes: FC<PropsWithChildren<LoadingRoutesProps>> = ({
   useEffect(() => {
     if (
       !isCurrentlyLoading &&
-      mount.current &&
       isPathsDifferent(prevLocation.current, location) &&
-      !isNormal
+      !isNormal &&
+      !loadingContext.isFirstRenderRef.current
     ) {
       prevLocation.current = { ...location };
       prevNavigationType.current = navigationType;
       forceUpdate({});
-    }
-
-    if (isCurrentlyLoading && !mount.current) {
-      mount.current = true;
     }
   }, [isCurrentlyLoading]);
 

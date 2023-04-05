@@ -34,6 +34,7 @@ const LoadingMiddleware: FC<PropsWithChildren<{ isLoading?: boolean }>> = ({
   }, []);
 
   const restart = useCallback(() => {
+    clearTimeout(timeout.current);
     topbar.hide();
     topbar.show();
   }, []);
@@ -49,7 +50,9 @@ const LoadingMiddleware: FC<PropsWithChildren<{ isLoading?: boolean }>> = ({
 
   const loadingProvider = useMemo(
     () => (
-      <LoadingContext.Provider value={{ start, done, restart }}>
+      <LoadingContext.Provider
+        value={{ start, done, restart, isFirstRenderRef: isFirstRender }}
+      >
         {children}
       </LoadingContext.Provider>
     ),
